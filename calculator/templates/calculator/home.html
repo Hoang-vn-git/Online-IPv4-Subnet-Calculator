@@ -3,56 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <title>IPv4 Subnet Calculator</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+
+<div class="container">
     <h1>IPv4 Subnet Calculator</h1>
 
-    <form method="post">
+    <form method="POST" class="card">
         {% csrf_token %}
 
-        <label for="ip_address">IP Address:</label>
-        <input type="text" id="ip_address" name="ip_address" value="{{ ip_address|default:'' }}" placeholder="192.168.1.10" required>
-        <br><br>
+        <div class="form-group">
+            <label>IP Address</label>
+            <input type="text" name="ip_address" placeholder="192.168.1.1" required>
+        </div>
 
-        <label for="cidr">CIDR:</label>
-        <input type="number" id="cidr" name="cidr" value="{{ cidr|default:'' }}" placeholder="24" min="0" max="32" required>
-        <br><br>
+        <div class="form-group">
+            <label>CIDR</label>
+            <input type="number" name="cidr" placeholder="24" min="0" max="32" required>
+        </div>
+        <div class="form-group">
+            <label>Hosts (VLSM)</label>
+            <input type="text" name="hosts" placeholder="50, 20, 10">
+        </div>
 
         <button type="submit">Calculate</button>
     </form>
 
     {% if error %}
-        <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
+        <div class="error">{{ error }}</div>
     {% endif %}
 
     {% if result %}
-        <h2>Calculation Result</h2>
-        <table border="1" cellpadding="8">
-            <tr>
-                <th>Field</th>
-                <th>Value</th>
-            </tr>
-            <tr>
-                <td>Subnet Mask</td>
-                <td>{{ result.subnet_mask }}</td>
-            </tr>
-            <tr>
-                <td>Network Address</td>
-                <td>{{ result.network }}</td>
-            </tr>
-            <tr>
-                <td>Broadcast Address</td>
-                <td>{{ result.broadcast }}</td>
-            </tr>
-            <tr>
-                <td>First Usable Host</td>
-                <td>{{ result.first }}</td>
-            </tr>
-            <tr>
-                <td>Last Usable Host</td>
-                <td>{{ result.last }}</td>
-            </tr>
-        </table>
+    <div class="result card">
+        <h2>Result</h2>
+
+        <div class="grid">
+            <div><strong>Network:</strong> {{ result.network }}</div>
+            <div><strong>Broadcast:</strong> {{ result.broadcast }}</div>
+            <div><strong>First IP:</strong> {{ result.first }}</div>
+            <div><strong>Last IP:</strong> {{ result.last }}</div>
+            <div><strong>Subnet Mask:</strong> {{ result.subnet_mask }}</div>
+        </div>
+    </div>
     {% endif %}
+    {% if vlsm %}
+    <div class="card">
+        <h2>VLSM Result</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hosts</th>
+                        <th>CIDR</th>
+                        <th>Subnet Mask</th>
+                        <th>Network</th>
+                        <th>Broadcast</th>
+                        <th>Usable Range</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subnet in vlsm %}
+                    <tr>
+                        <td>{{ subnet.hosts }}</td>
+                        <td>/{{ subnet.cidr }}</td>
+                        <td>{{ subnet.subnet_mask }}</td>
+                        <td>{{ subnet.network }}</td>
+                        <td>{{ subnet.broadcast }}</td>
+                        <td>{{ subnet.first }} - {{ subnet.last }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
 </body>
 </html>
